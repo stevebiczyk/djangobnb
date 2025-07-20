@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "./components/navbar/Navbar";
+import Modal from "./components/modals/Modal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,6 +24,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const content = (
+    <div>
+      <p>This is the content of the modal.</p>
+    </div>
+  );
   return (
     <html lang="en">
       <body
@@ -30,6 +36,7 @@ export default function RootLayout({
       >
         <NavBar />
         <div className="pt-26">{children}</div>
+        <Modal label="Modal Title" content={content} isOpen={true} />
       </body>
     </html>
   );
