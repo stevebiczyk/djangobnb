@@ -5,11 +5,16 @@ import { useCallback, useEffect, useState } from "react";
 interface ModalProps {
   label: string;
   content: React.ReactElement;
-  close?: () => void;
+  closeModal: () => void;
   isOpen: boolean;
 }
 
-const Modal: React.FC<ModalProps> = ({ label, content, isOpen, close }) => {
+const Modal: React.FC<ModalProps> = ({
+  label,
+  content,
+  isOpen,
+  closeModal,
+}) => {
   const [showModal, setShowModal] = useState(isOpen);
 
   useEffect(() => {
@@ -20,11 +25,11 @@ const Modal: React.FC<ModalProps> = ({ label, content, isOpen, close }) => {
     setShowModal(false);
 
     setTimeout(() => {
-      if (close) {
-        close();
+      if (closeModal) {
+        closeModal();
       }
     }, 300);
-  }, [close]);
+  }, [closeModal]);
 
   if (!isOpen) {
     return null;
@@ -41,7 +46,10 @@ const Modal: React.FC<ModalProps> = ({ label, content, isOpen, close }) => {
           }`}
         >
           <div className="w-full h-auto rounded-xl relative flex flex-col bg-white">
-            <header className="h-[60px] flex items-center p-6 rounded-t justify-center relative border-b">
+            <header
+              onClick={handleClose}
+              className="h-[60px] flex items-center p-6 rounded-t justify-center relative border-b"
+            >
               <div className="p-3 absolute left-3 hover:bg-gray-300 rounded-full cursor-pointer">
                 <svg
                   fill="none"
