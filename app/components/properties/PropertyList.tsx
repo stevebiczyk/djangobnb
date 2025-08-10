@@ -1,5 +1,6 @@
 "use client";
 
+import apiService from "@/app/services/apiService";
 import { useState, useEffect } from "react";
 import PropertyListItem from "./PropertyListItem";
 
@@ -31,6 +32,8 @@ const PropertyList = () => {
   };
 
   useEffect(() => {
+    apiService.get("hello");
+
     getProperties();
   }, []);
 
