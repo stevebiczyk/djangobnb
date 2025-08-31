@@ -64,8 +64,9 @@ const LoginModal = () => {
 
         <CustomButton
           label="Submit"
-          onClick={(submitLogin) => {
+          onClick={() => {
             console.log("Form submitted");
+            submitLogin();
           }}
         />
       </form>
