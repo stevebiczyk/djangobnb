@@ -5,6 +5,7 @@ import NavBar from "./components/navbar/Navbar";
 // import Modal from "./components/modals/Modal";
 import LoginModal from "./components/modals/LoginModal";
 import SignupModal from "./components/modals/SignupModal";
+import AddPropertyModal from "./components/modals/AddPropertyModal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,6 +41,7 @@ export default function RootLayout({
         <div className="pt-26">{children}</div>
         <LoginModal />
         <SignupModal />
+        <AddPropertyModal />
         {/* Uncomment the line below to test the Modal component */}
         {/* <Modal label="Modal Title" content={content} isOpen={true} /> */}
       </body>
