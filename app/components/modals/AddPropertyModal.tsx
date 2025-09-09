@@ -6,6 +6,7 @@ import { useState } from "react";
 import useAddPropertyModal from "@/app/hooks/useAddPropertyModal";
 import Categories from "../addproperty/Categories";
 import CustomButton from "../forms/CustomButton";
+import SelectCountry, { SelectCountryValue } from "../forms/SelectCountry";
 
 const AddPropertyModal = () => {
   //
@@ -18,6 +19,7 @@ const AddPropertyModal = () => {
   const [dataBedrooms, setDataBedrooms] = useState("");
   const [dataBathrooms, setDataBathrooms] = useState("");
   const [dataGuests, setDataGuests] = useState("");
+  const [dataCountry, setDataCountry] = useState<SelectCountryValue>();
 
   //
   // Hooks
@@ -128,7 +130,12 @@ const AddPropertyModal = () => {
         <>
           <h2 className="mb-6 text-2xl">Location</h2>
 
-          <div className="pt-3 pb-6 space-y-4">Select Country</div>
+          <div className="pt-3 pb-6 space-y-4">
+            <SelectCountry
+              value={dataCountry}
+              onChange={(value) => setDataCountry(value as SelectCountryValue)}
+            />
+          </div>
 
           <CustomButton
             label="Previous"
