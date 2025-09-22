@@ -1,12 +1,27 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
+// import useSearchModal, { SearchQuery } from "../hooks/useSearchModal";
 
 const Categories = () => {
+  const [category, setCategory] = useState("");
+
+  const _setCategory = (_category: string) => {
+    setCategory(_category);
+  };
+
   return (
     <div className="pt-3 cursor-pointer pb-6 flex items-center space-x-12">
-      <div className="pb-4 flex flex-col items-center space-y-2 border-b-2 border-white opacity-60 hover:border-gray-200 hover:opacity-100">
+      <div
+        onClick={() => _setCategory("")}
+        className={`pb-4 flex flex-col items-center space-y-2 border-b-2 ${
+          category == "" ? "border-black" : "border-white"
+        } opacity-60 hover:border-gray-200 hover:opacity-100`}
+      >
         <Image
           src="/icn_category_beach.jpeg"
-          alt="Category - All"
+          alt="Category - Beach"
           width={20}
           height={20}
         />
@@ -14,7 +29,12 @@ const Categories = () => {
         <span className="text-xs">All</span>
       </div>
 
-      <div className="pb-4 flex flex-col items-center space-y-2 border-b-2 border-white opacity-60 hover:border-gray-200 hover:opacity-100">
+      <div
+        onClick={() => _setCategory("beach")}
+        className={`pb-4 flex flex-col items-center space-y-2 border-b-2 ${
+          category == "beach" ? "border-black" : "border-white"
+        } opacity-60 hover:border-gray-200 hover:opacity-100`}
+      >
         <Image
           src="/icn_category_beach.jpeg"
           alt="Category - Beach"
@@ -25,10 +45,15 @@ const Categories = () => {
         <span className="text-xs">Beach</span>
       </div>
 
-      <div className="pb-4 flex flex-col items-center space-y-2 border-b-2 border-white opacity-60 hover:border-gray-200 hover:opacity-100">
+      <div
+        onClick={() => _setCategory("villas")}
+        className={`pb-4 flex flex-col items-center space-y-2 border-b-2 ${
+          category == "villas" ? "border-black" : "border-white"
+        } opacity-60 hover:border-gray-200 hover:opacity-100`}
+      >
         <Image
           src="/icn_category_beach.jpeg"
-          alt="Category - Villas"
+          alt="Category - Beach"
           width={20}
           height={20}
         />
@@ -36,21 +61,15 @@ const Categories = () => {
         <span className="text-xs">Villas</span>
       </div>
 
-      <div className="pb-4 flex flex-col items-center space-y-2 border-b-2 border-white opacity-60 hover:border-gray-200 hover:opacity-100">
+      <div
+        onClick={() => _setCategory("cabins")}
+        className={`pb-4 flex flex-col items-center space-y-2 border-b-2 ${
+          category == "cabins" ? "border-black" : "border-white"
+        } opacity-60 hover:border-gray-200 hover:opacity-100`}
+      >
         <Image
           src="/icn_category_beach.jpeg"
-          alt="Category - Cabins"
-          width={20}
-          height={20}
-        />
-
-        <span className="text-xs">Villas</span>
-      </div>
-
-      <div className="pb-4 flex flex-col items-center space-y-2 border-b-2 border-white opacity-60 hover:border-gray-200 hover:opacity-100">
-        <Image
-          src="/icn_category_beach.jpeg"
-          alt="Category - Cabins"
+          alt="Category - Beach"
           width={20}
           height={20}
         />
@@ -58,10 +77,15 @@ const Categories = () => {
         <span className="text-xs">Cabins</span>
       </div>
 
-      <div className="pb-4 flex flex-col items-center space-y-2 border-b-2 border-white opacity-60 hover:border-gray-200 hover:opacity-100">
+      <div
+        onClick={() => _setCategory("tiny_homes")}
+        className={`pb-4 flex flex-col items-center space-y-2 border-b-2 ${
+          category == "tiny_homes" ? "border-black" : "border-white"
+        } opacity-60 hover:border-gray-200 hover:opacity-100`}
+      >
         <Image
           src="/icn_category_beach.jpeg"
-          alt="Category - Tiny homes"
+          alt="Category - Beach"
           width={20}
           height={20}
         />
@@ -71,4 +95,5 @@ const Categories = () => {
     </div>
   );
 };
+
 export default Categories;

@@ -21,7 +21,10 @@ const LoginModal = () => {
       password: password,
     };
 
-    const response = await apiService.post("/api/auth/login/", formData);
+    const response = await apiService.postWithoutToken(
+      "/api/auth/login/",
+      formData
+    );
 
     if (response.access) {
       handleLogin(response.user.pk, response.access, response.refresh);
