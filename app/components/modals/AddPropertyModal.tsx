@@ -45,126 +45,131 @@ const AddPropertyModal = () => {
   };
 
   //
+  //
   // Submit
-  // Submit
-  const submitForm = async () => {
-    console.log("Submit Form");
-    setErrors([]);
-
-    // 1) Client-side validation so we don't silently do nothing
-    const missing: string[] = [];
-    if (!dataCategory) missing.push("Category is required");
-    if (!dataTitle) missing.push("Title is required");
-    if (!dataDescription) missing.push("Description is required");
-    if (!dataPrice) missing.push("Price is required");
-    if (!dataGuests) missing.push("Guests is required");
-    if (!dataBedrooms) missing.push("Bedrooms is required");
-    if (!dataBathrooms) missing.push("Bathrooms is required");
-    if (!dataCountry?.value) missing.push("Country is required");
-    if (!dataImage) missing.push("Image is required");
-
-    if (missing.length) {
-      setErrors(missing);
-      console.warn("Form validation failed:", missing);
-      return;
-    }
-
-    // 2) Build FormData
-    const formData = new FormData();
-    formData.append("category", dataCategory);
-    formData.append("title", dataTitle);
-    formData.append("description", dataDescription);
-    formData.append("price", dataPrice); // maps to db_column price_per_night via your model
-    formData.append("bedrooms", dataBedrooms);
-    formData.append("bathrooms", dataBathrooms);
-    formData.append("guests", dataGuests);
-    formData.append("country", dataCountry!.value);
-    formData.append("image", dataImage as File);
-
-    // Optional: Debug the payload (helps a TON)
-    for (const [k, v] of formData.entries()) {
-      console.log("FD", k, v);
-    }
-    console.log("API host:", process.env.NEXT_PUBLIC_API_HOST);
-
-    try {
-      // 3) Send: apiService.post already handles FormData vs JSON and throws on non-2xx
-      const created = await apiService.post(
-        "/api/properties/create/",
-        formData
-      );
-      console.log("Created property:", created);
-
-      // 4) Success: don't rely on response.success (might not exist)
-      router.push("/");
-      addPropertyModal.closeModal();
-    } catch (err: any) {
-      console.error("Create property failed:", err);
-
-      // Try to extract and show DRF-style errors from the thrown error text
-      const msg = String(err?.message ?? "");
-      const match = msg.match(/:\s*({[\s\S]*})\s*$/); // grabs trailing {...} JSON if present
-      if (match) {
-        try {
-          const data = JSON.parse(match[1]);
-          const tmpErrors: string[] = Object.values(data).flatMap((v: any) =>
-            Array.isArray(v) ? v.map(String) : typeof v === "string" ? [v] : []
-          );
-          setErrors(tmpErrors.length ? tmpErrors : ["Failed to add property."]);
-          return;
-        } catch {
-          /* fall through */
-        }
-      }
-      // Fallback
-      setErrors(["Failed to add property. Please try again."]);
-    }
-  };
-
   // const submitForm = async () => {
   //   console.log("Submit Form");
+  //   setErrors([]);
 
-  //   if (
-  //     dataCategory &&
-  //     dataTitle &&
-  //     dataDescription &&
-  //     dataPrice &&
-  //     dataCountry &&
-  //     dataImage
-  //   ) {
-  //     const formData = new FormData();
-  //     formData.append("category", dataCategory);
-  //     formData.append("title", dataTitle);
-  //     formData.append("description", dataDescription);
-  //     formData.append("price", dataPrice);
-  //     formData.append("bedrooms", dataBedrooms);
-  //     formData.append("bathrooms", dataBathrooms);
-  //     formData.append("guests", dataGuests);
-  //     formData.append("country", dataCountry.value);
-  //     formData.append("image", dataImage);
+  //   // 1) Client-side validation so we don't silently do nothing
+  //   const missing: string[] = [];
+  //   if (!dataCategory) missing.push("Category is required");
+  //   if (!dataTitle) missing.push("Title is required");
+  //   if (!dataDescription) missing.push("Description is required");
+  //   if (!dataPrice) missing.push("Price is required");
+  //   if (!dataGuests) missing.push("Guests is required");
+  //   if (!dataBedrooms) missing.push("Bedrooms is required");
+  //   if (!dataBathrooms) missing.push("Bathrooms is required");
+  //   if (!dataCountry?.value) missing.push("Country is required");
+  //   if (!dataImage) missing.push("Image is required");
 
-  //     const response = await apiService.post(
+  //   if (missing.length) {
+  //     setErrors(missing);
+  //     console.warn("Form validation failed:", missing);
+  //     return;
+  //   }
+
+  //   // 2) Build FormData
+  //   const formData = new FormData();
+  //   formData.append("category", dataCategory);
+  //   formData.append("title", dataTitle);
+  //   formData.append("description", dataDescription);
+  //   formData.append("price", dataPrice); // maps to db_column price_per_night via your model
+  //   formData.append("bedrooms", dataBedrooms);
+  //   formData.append("bathrooms", dataBathrooms);
+  //   formData.append("guests", dataGuests);
+  //   formData.append("country", dataCountry!.label);
+  //   formData.append("country_code", dataCountry!.value);
+  //   formData.append("image", dataImage as File);
+
+  //   // Optional: Debug the payload (helps a TON)
+  //   for (const [k, v] of formData.entries()) {
+  //     console.log("FD", k, v);
+  //   }
+  //   console.log("API host:", process.env.NEXT_PUBLIC_API_HOST);
+
+  //   try {
+  //     // 3) Send: apiService.post already handles FormData vs JSON and throws on non-2xx
+  //     const created = await apiService.post(
   //       "/api/properties/create/",
   //       formData
   //     );
+  //     console.log("Created property:", created);
 
-  //     if (response.success) {
-  //       console.log("Property added successfully");
-  //       router.push("/");
+  //     // 4) Success: don't rely on response.success (might not exist)
+  //     router.push("/");
+  //     addPropertyModal.closeModal();
+  //   } catch (err: any) {
+  //     console.error("Create property failed:", err);
 
-  //       addPropertyModal.closeModal();
-  //     } else {
-  //       console.log("Failed to add property");
-
-  //       const tmpErrors: string[] = Object.values(response).map(
-  //         (error: any) => {
-  //           return error;
-  //         }
-  //       );
-  //       setErrors(tmpErrors);
+  //     // Try to extract and show DRF-style errors from the thrown error text
+  //     const msg = String(err?.message ?? "");
+  //     const match = msg.match(/:\s*({[\s\S]*})\s*$/); // grabs trailing {...} JSON if present
+  //     if (match) {
+  //       try {
+  //         const data = JSON.parse(match[1]);
+  //         const tmpErrors: string[] = Object.values(data).flatMap((v: any) =>
+  //           Array.isArray(v) ? v.map(String) : typeof v === "string" ? [v] : []
+  //         );
+  //         setErrors(tmpErrors.length ? tmpErrors : ["Failed to add property."]);
+  //         return;
+  //       } catch {
+  //         /* fall through */
+  //       }
   //     }
+  //     // Fallback
+  //     setErrors(["Failed to add property. Please try again."]);
   //   }
   // };
+
+  const submitForm = async () => {
+    console.log("Submit Form");
+
+    if (
+      dataCategory &&
+      dataTitle &&
+      dataDescription &&
+      dataPrice &&
+      dataCountry &&
+      dataImage
+    ) {
+      const formData = new FormData();
+      const { value, label } = dataCountry as SelectCountryValue; // value = "GB", label = "United Kingdom"
+      formData.append("category", dataCategory);
+      formData.append("title", dataTitle);
+      formData.append("description", dataDescription);
+      formData.append("price", dataPrice);
+      formData.append("bedrooms", dataBedrooms);
+      formData.append("bathrooms", dataBathrooms);
+      formData.append("guests", dataGuests);
+      // formData.append("country", dataCountry.value);
+      formData.append("country", label ?? "");
+      formData.append("country_code", value ?? "");
+      formData.append("image", dataImage);
+
+      // const response = await apiService.postWithoutToken(
+      const response = await apiService.post(
+        "/api/properties/create/",
+        formData
+      );
+
+      if (response.success) {
+        console.log("Property added successfully");
+        router.push("/");
+
+        addPropertyModal.closeModal();
+      } else {
+        console.log("Failed to add property");
+
+        const tmpErrors: string[] = Object.values(response).map(
+          (error: any) => {
+            return error;
+          }
+        );
+        setErrors(tmpErrors);
+      }
+    }
+  };
 
   //
   // Content
