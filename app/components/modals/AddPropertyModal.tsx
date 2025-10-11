@@ -308,6 +308,17 @@ const AddPropertyModal = () => {
             )}
           </div>
 
+          {errors.map((error, index) => {
+            return (
+              <div
+                key={index}
+                className="p-5 mb-4 bg-red-400 text-white rounded-xl opacity-80"
+              >
+                {error}
+              </div>
+            );
+          })}
+
           <CustomButton
             label="Previous"
             className="mb-2 bg-black hover:bg-gray-800"
