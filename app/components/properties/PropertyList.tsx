@@ -40,7 +40,10 @@ const PropertyList = () => {
 
   return (
     <>
-      {properties.map((property) => {
+      {(properties ?? []).map((property) => {
+        {
+          /* {properties.map((property) => { */
+        }
         return <PropertyListItem key={property.id} property={property} />;
       })}
     </>
