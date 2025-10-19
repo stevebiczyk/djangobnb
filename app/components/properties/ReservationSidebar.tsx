@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Range } from "react-date-range";
 import apiService from "@/app/services/apiService";
 import useLoginModal from "@/app/hooks/useLoginModal";
-import { differenceInDays, eachDayOfInterval } from "date-fns";
+import { differenceInDays, eachDayOfInterval, format } from "date-fns";
 import DateSelector from "../forms/Calendar";
 
 const initialdateRange: Range = {
@@ -40,6 +40,32 @@ const ReservationSidebar: React.FC<ReservationSidebarProps> = ({
     (i + 1).toString()
   );
 
+  const createBooking = async () => {
+    if (!userId) {
+      loginModal.openModal();
+      return;
+    }
+
+    if (dateRange.startDate && dateRange.endDate) {
+      const formData = new FormData();
+      formData.append("guests", guests);
+      formData.append("start_date", format(dateRange.startDate, "yyyy-MM-dd"));
+      formData.append("end_date", format(dateRange.endDate, "yyyy-MM-dd"));
+      formData.append("number_of_nights", nights.toString());
+      formData.append("total_price", totalPrice.toString());
+
+      const response = await apiService.post(
+        `/api/properties/${property.id}/bookings/`,
+        formData
+      );
+      if (response.success) {
+        alert("Booking created successfully!");
+      } else {
+        alert("Failed to create booking. Please try again.");
+      }
+    }
+  };
+
   const _setDateRange = (selection: any) => {
     const newStartDate = new Date(selection.startDate);
     const newEndDate = new Date(selection.endDate);
@@ -72,14 +98,6 @@ const ReservationSidebar: React.FC<ReservationSidebarProps> = ({
     }
   }, [dateRange]);
 
-  // useEffect(() => {
-  //   const calculateFee = () => {
-  //     const calculatedFee = Math.round(property.price * 0.1); // 10% fee
-  //     setFee(calculatedFee);
-  //   };
-  //   calculateFee();
-  // }, [property.price]);
-
   return (
     <aside className="mt-6 p-6 col-span-2 rounded-xl border border-gray-300 shadow-xl">
       <h2 className="mb-5 text-2xl">${property.price} per night</h2>
@@ -102,7 +120,10 @@ const ReservationSidebar: React.FC<ReservationSidebarProps> = ({
           ))}
         </select>
       </div>
-      <div className="w-full mb-6 py-6 text-center text-white bg-red-400 hover:bg-red-700 rounded-xl">
+      <div
+        className="w-full mb-6 py-6 text-center text-white bg-red-400 hover:bg-red-700 rounded-xl"
+        onClick={createBooking}
+      >
         Book
       </div>
       <div className="mb-4 flex justify-between align-center">
