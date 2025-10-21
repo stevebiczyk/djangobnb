@@ -35,6 +35,7 @@ const ReservationSidebar: React.FC<ReservationSidebarProps> = ({
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [dateRange, setDateRange] = useState<Range>(initialdateRange);
   const [minDate, setMinDate] = useState<Date>(new Date());
+  const [bookedDates, setBookedDates] = useState<Date[]>([]);
   const [guests, setGuests] = useState<string>("1");
   const guestsRange = Array.from({ length: property.guests }, (_, i) =>
     (i + 1).toString()
@@ -55,7 +56,7 @@ const ReservationSidebar: React.FC<ReservationSidebarProps> = ({
       formData.append("total_price", totalPrice.toString());
 
       const response = await apiService.post(
-        `/api/properties/${property.id}/bookings/`,
+        `/api/properties/${property.id}/booking/`,
         formData
       );
       if (response.success) {
@@ -81,7 +82,24 @@ const ReservationSidebar: React.FC<ReservationSidebarProps> = ({
     });
   };
 
+  const getReservations = async () => {
+    const reservations = await apiService.get(
+      `/api/properties/${property.id}/reservations/`
+    );
+
+    let dates: Date[] = [];
+    reservations.forEach((booking: any) => {
+      const range = eachDayOfInterval({
+        start: new Date(booking.start_date),
+        end: new Date(booking.end_date),
+      });
+      dates = [...dates, ...range];
+    });
+    setBookedDates(bookedDates);
+  };
+
   useEffect(() => {
+    getReservations();
     if (dateRange.startDate && dateRange.endDate) {
       const dayCount = differenceInDays(dateRange.endDate, dateRange.startDate);
       if (dayCount && property.price) {
@@ -103,8 +121,8 @@ const ReservationSidebar: React.FC<ReservationSidebarProps> = ({
       <h2 className="mb-5 text-2xl">${property.price} per night</h2>
       <DateSelector
         value={dateRange}
+        bookedDates={bookedDates}
         onChange={(ranges) => setDateRange(ranges.selection)}
-        bookedDates={[]}
       />
       <div className="mb-6 p-3 border border-gray-400 rounded-xl">
         <label className="mb-2 block font-bold text-xs">Guests</label>

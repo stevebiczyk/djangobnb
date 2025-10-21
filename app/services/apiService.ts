@@ -233,9 +233,6 @@ const apiService = {
 
           resolve(json);
         })
-        // .catch((error) => {
-        //   reject(error);
-        // });
         .catch((error) => reject(error));
     });
   },
