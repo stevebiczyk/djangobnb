@@ -11,7 +11,11 @@ export type PropertyType = {
   price: number;
 };
 
-const PropertyList = () => {
+interface PropertyListProps {
+  landlord_id?: string | null;
+}
+
+const PropertyList: React.FC<PropertyListProps> = ({ landlord_id }) => {
   const [properties, setProperties] = useState<PropertyType[]>([]);
 
   // Function to fetch properties from the API
@@ -25,6 +29,18 @@ const PropertyList = () => {
       setProperties([]); // keep UI stable
     }
   };
+  //   try {
+  //     let url = "/api/properties/";
+  //     if (landlord_id) {
+  //       url += `?landlord_id=${landlord_id}`;
+  //     }
+  //     const tmpProperties = await apiService.get(url);
+  //     setProperties(tmpProperties.data);
+  //   } catch (error) {
+  //     console.error("Failed to fetch properties:", error);
+  //     setProperties([]); // keep UI stable
+  //   }
+  // };
 
   useEffect(() => {
     getProperties();
