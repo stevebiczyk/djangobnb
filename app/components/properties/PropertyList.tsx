@@ -22,23 +22,47 @@ const PropertyList: React.FC<PropertyListProps> = ({ landlord_id }) => {
 
   const getProperties = async () => {
     try {
-      const list = await apiService.get("/api/properties/");
-      setProperties(list);
+      let url = "/api/properties/";
+      if (landlord_id) {
+        url += `?landlord_id=${landlord_id}`;
+      }
+      console.log("Fetching from:", url);
+      const tmpProperties = await apiService.get(url);
+      console.log("Response:", tmpProperties);
+      setProperties(tmpProperties.data);
     } catch (error) {
       console.error("Failed to fetch properties:", error);
       setProperties([]); // keep UI stable
     }
   };
+  // const getProperties = async () => {
   //   try {
   //     let url = "/api/properties/";
   //     if (landlord_id) {
-  //       url += `?landlord_id=${landlord_id}`;
+  //       const qs = new URLSearchParams({ landlord_id: String(landlord_id) });
+  //       url += `?${qs.toString()}`; // ✅ encoded
   //     }
-  //     const tmpProperties = await apiService.get(url);
-  //     setProperties(tmpProperties.data);
+
+  //     const list = await apiService.get(url);
+  //     setProperties(list); // ✅ don't use .data
   //   } catch (error) {
   //     console.error("Failed to fetch properties:", error);
   //     setProperties([]); // keep UI stable
+  //   }
+  // };
+
+  // const getProperties = async () => {
+  //   try {
+  //     let url = "/api/properties/";
+  //     if (landlord_id) {
+  //       const qs = new URLSearchParams({ landlord_id: String(landlord_id) });
+  //       url += `?${qs}`;
+  //     }
+  //     const res = await apiService.get(url);
+  //     setProperties(res.data); // ✅ only if the API truly returns { data: [...] }
+  //   } catch (error) {
+  //     console.error("Failed to fetch properties:", error);
+  //     setProperties([]);
   //   }
   // };
 
