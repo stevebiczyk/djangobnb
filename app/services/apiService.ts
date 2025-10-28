@@ -3,16 +3,15 @@ import { getAccessToken } from "../lib/actions";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_HOST ?? "";
 
+// tiny helpers (kept inline-style)
 const isFormData = (v: unknown): v is FormData =>
   typeof FormData !== "undefined" && v instanceof FormData;
 
-const resolveAccessToken = async (): Promise<string | null> => {
-  // Prefer fresh browser token
+const resolveToken = async (): Promise<string | null> => {
   if (typeof window !== "undefined") {
     const t = localStorage.getItem("access_token");
     if (t) return t;
   }
-  // Fallback to server helper (no-op on client if unavailable)
   try {
     return await getAccessToken();
   } catch {
@@ -20,60 +19,172 @@ const resolveAccessToken = async (): Promise<string | null> => {
   }
 };
 
-const parseResponse = async (res: Response, url: string, method: string) => {
-  const text = await res.text(); // read once
-  if (!res.ok) {
-    // bubble the real body for debugging (JSON or HTML/text)
-    throw new Error(`${method} ${url} ${res.status}: ${text}`);
-  }
-  return text ? JSON.parse(text) : null;
-};
-
-const request = async (
-  method: "GET" | "POST",
-  url: string,
-  data?: unknown,
-  withAuth = true
-) => {
-  const isFD = isFormData(data);
-  const isAuthRoute = url.startsWith("/api/auth/"); // don’t send Authorization here
-
-  const token = withAuth && !isAuthRoute ? await resolveAccessToken() : null;
-
-  const headers: Record<string, string> = {};
-  if (method === "GET" || !isFD) {
-    headers.Accept = "application/json";
-  }
-  if (!isFD && method === "POST") {
-    headers["Content-Type"] = "application/json";
-  }
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  const body: BodyInit | undefined =
-    method === "POST"
-      ? isFD
-        ? (data as FormData)
-        : JSON.stringify(data ?? {})
-      : undefined;
-
-  const res = await fetch(`${API_BASE}${url}`, { method, headers, body });
-  return parseResponse(res, url, method);
-};
-
 const apiService = {
-  // Always returns parsed JSON (or null for empty body) or throws with a detailed Error
-  get: (url: string) => request("GET", url, undefined, /*withAuth*/ true),
+  get: async function (url: string): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const token = await resolveToken();
+        const headers: Record<string, string> = {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        };
+        if (token) headers.Authorization = `Bearer ${token}`;
 
-  // Handles both JSON objects and FormData; attaches Authorization unless it's an auth route
-  post: (url: string, data: unknown) =>
-    request("POST", url, data, /*withAuth*/ true),
+        fetch(`${API_BASE}${url}`, { method: "GET", headers })
+          .then(async (res) => {
+            const text = await res.text(); // read once
+            if (!res.ok) throw new Error(`GET ${url} ${res.status}: ${text}`);
+            return text ? JSON.parse(text) : null;
+          })
+          .then((json) => resolve(json))
+          .catch((err) => reject(err));
+      } catch (err) {
+        reject(err);
+      }
+    });
+  },
 
-  // Public POST (no Authorization); still handles JSON vs FormData correctly
-  postWithoutToken: (url: string, data: unknown) =>
-    request("POST", url, data, /*withAuth*/ false),
+  post: async function (url: string, data: unknown): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const token = await resolveToken();
+        const isAuthRoute = url.startsWith("/api/auth/"); // don't send Authorization to login/refresh
+        const isFD = isFormData(data);
+
+        const headers: Record<string, string> = {};
+        if (!isFD) {
+          headers.Accept = "application/json";
+          headers["Content-Type"] = "application/json";
+        }
+        if (token && !isAuthRoute) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+
+        const body: BodyInit = isFD
+          ? (data as FormData)
+          : JSON.stringify(data ?? {});
+
+        fetch(`${API_BASE}${url}`, { method: "POST", headers, body })
+          .then(async (res) => {
+            const text = await res.text();
+            if (!res.ok) throw new Error(`POST ${url} ${res.status}: ${text}`);
+            return text ? JSON.parse(text) : null;
+          })
+          .then((json) => resolve(json))
+          .catch((err) => reject(err));
+      } catch (err) {
+        reject(err);
+      }
+    });
+  },
+
+  postWithoutToken: async function (url: string, data: unknown): Promise<any> {
+    // identical to post(), but never attaches Authorization
+    return new Promise(async (resolve, reject) => {
+      try {
+        const isFD = isFormData(data);
+        const headers: Record<string, string> = {};
+        if (!isFD) {
+          headers.Accept = "application/json";
+          headers["Content-Type"] = "application/json";
+        }
+        const body: BodyInit = isFD
+          ? (data as FormData)
+          : JSON.stringify(data ?? {});
+
+        fetch(`${API_BASE}${url}`, { method: "POST", headers, body })
+          .then(async (res) => {
+            const text = await res.text();
+            if (!res.ok) throw new Error(`POST ${url} ${res.status}: ${text}`);
+            return text ? JSON.parse(text) : null;
+          })
+          .then((json) => resolve(json))
+          .catch((err) => reject(err));
+      } catch (err) {
+        reject(err);
+      }
+    });
+  },
 };
 
 export default apiService;
+
+// // app/services/apiService.ts
+// import { getAccessToken } from "../lib/actions";
+
+// const API_BASE = process.env.NEXT_PUBLIC_API_HOST ?? "";
+
+// const isFormData = (v: unknown): v is FormData =>
+//   typeof FormData !== "undefined" && v instanceof FormData;
+
+// const resolveAccessToken = async (): Promise<string | null> => {
+//   // Prefer fresh browser token
+//   if (typeof window !== "undefined") {
+//     const t = localStorage.getItem("access_token");
+//     if (t) return t;
+//   }
+//   // Fallback to server helper (no-op on client if unavailable)
+//   try {
+//     return await getAccessToken();
+//   } catch {
+//     return null;
+//   }
+// };
+
+// const parseResponse = async (res: Response, url: string, method: string) => {
+//   const text = await res.text(); // read once
+//   if (!res.ok) {
+//     // bubble the real body for debugging (JSON or HTML/text)
+//     throw new Error(`${method} ${url} ${res.status}: ${text}`);
+//   }
+//   return text ? JSON.parse(text) : null;
+// };
+
+// const request = async (
+//   method: "GET" | "POST",
+//   url: string,
+//   data?: unknown,
+//   withAuth = true
+// ) => {
+//   const isFD = isFormData(data);
+//   const isAuthRoute = url.startsWith("/api/auth/"); // don’t send Authorization here
+
+//   const token = withAuth && !isAuthRoute ? await resolveAccessToken() : null;
+
+//   const headers: Record<string, string> = {};
+//   if (method === "GET" || !isFD) {
+//     headers.Accept = "application/json";
+//   }
+//   if (!isFD && method === "POST") {
+//     headers["Content-Type"] = "application/json";
+//   }
+//   if (token) headers.Authorization = `Bearer ${token}`;
+
+//   const body: BodyInit | undefined =
+//     method === "POST"
+//       ? isFD
+//         ? (data as FormData)
+//         : JSON.stringify(data ?? {})
+//       : undefined;
+
+//   const res = await fetch(`${API_BASE}${url}`, { method, headers, body });
+//   return parseResponse(res, url, method);
+// };
+
+// const apiService = {
+//   // Always returns parsed JSON (or null for empty body) or throws with a detailed Error
+//   get: (url: string) => request("GET", url, undefined, /*withAuth*/ true),
+
+//   // Handles both JSON objects and FormData; attaches Authorization unless it's an auth route
+//   post: (url: string, data: unknown) =>
+//     request("POST", url, data, /*withAuth*/ true),
+
+//   // Public POST (no Authorization); still handles JSON vs FormData correctly
+//   postWithoutToken: (url: string, data: unknown) =>
+//     request("POST", url, data, /*withAuth*/ false),
+// };
+
+// export default apiService;
 
 // import { getAccessToken } from "../lib/actions";
 
