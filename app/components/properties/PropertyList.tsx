@@ -24,12 +24,15 @@ const PropertyList: React.FC<PropertyListProps> = ({ landlord_id }) => {
     try {
       let url = "/api/properties/";
       if (landlord_id) {
-        url += `?landlord_id=${landlord_id}`;
+        const qs = new URLSearchParams({ landlord_id: String(landlord_id) });
+        url += `?${qs.toString()}`;
       }
+      //   url += `?landlord_id=${landlord_id}`;
+      // }
       console.log("Fetching from:", url);
       const tmpProperties = await apiService.get(url);
       console.log("Response:", tmpProperties);
-      setProperties(tmpProperties.data);
+      setProperties(tmpProperties); //  don't use .data
     } catch (error) {
       console.error("Failed to fetch properties:", error);
       setProperties([]); // keep UI stable
