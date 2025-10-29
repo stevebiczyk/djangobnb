@@ -9,6 +9,7 @@ export type PropertyType = {
   title: string;
   image_url?: string;
   price: number;
+  is_favorite: boolean;
 };
 
 interface PropertyListProps {
@@ -17,6 +18,21 @@ interface PropertyListProps {
 
 const PropertyList: React.FC<PropertyListProps> = ({ landlord_id }) => {
   const [properties, setProperties] = useState<PropertyType[]>([]);
+
+  const markFavorite = (id: string, is_favorite: boolean) => {
+    const tmpProperties = properties.map((property: PropertyType) => {
+      if (property.id == id) {
+        property.is_favorite = is_favorite;
+        if (is_favorite) {
+          console.log(`Property ${id} marked as favorite`);
+        } else {
+          console.log(`Property ${id} unmarked as favorite`);
+        }
+      }
+      return property;
+    });
+    setProperties(tmpProperties);
+  };
 
   // Function to fetch properties from the API
 
@@ -27,17 +43,32 @@ const PropertyList: React.FC<PropertyListProps> = ({ landlord_id }) => {
         const qs = new URLSearchParams({ landlord_id: String(landlord_id) });
         url += `?${qs.toString()}`;
       }
-      //   url += `?landlord_id=${landlord_id}`;
-      // }
-      console.log("Fetching from:", url);
       const tmpProperties = await apiService.get(url);
-      console.log("Response:", tmpProperties);
-      setProperties(tmpProperties); //  don't use .data
+
+      const favoriteIds: string[] = tmpProperties.favorites || [];
+
+      setProperties(
+        (tmpProperties.data || []).map((property: PropertyType) => {
+          property.is_favorite = favoriteIds.includes(String(property.id));
+          return property;
+        })
+      );
     } catch (error) {
       console.error("Failed to fetch properties:", error);
-      setProperties([]); // keep UI stable
+      setProperties([]);
     }
   };
+  //   url += `?landlord_id=${landlord_id}`;
+  // }
+  //     console.log("Fetching from:", url);
+  //     const tmpProperties = await apiService.get(url);
+  //     console.log("Response:", tmpProperties);
+  //     setProperties(tmpProperties); //  don't use .data
+  //   } catch (error) {
+  //     console.error("Failed to fetch properties:", error);
+  //     setProperties([]); // keep UI stable
+  //   }
+  // };
   // const getProperties = async () => {
   //   try {
   //     let url = "/api/properties/";
@@ -76,7 +107,13 @@ const PropertyList: React.FC<PropertyListProps> = ({ landlord_id }) => {
   return (
     <>
       {properties.map((property) => (
-        <PropertyListItem key={property.id} property={property} />
+        <PropertyListItem
+          key={property.id}
+          property={property}
+          markFavorite={(is_favorite: any) =>
+            markFavorite(property.id, is_favorite)
+          }
+        />
       ))}
     </>
   );
