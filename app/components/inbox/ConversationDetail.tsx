@@ -1,8 +1,24 @@
 "use client";
 
 import CustomButton from "../forms/CustomButton";
+import { ConversationType } from "@/app/inbox/page";
 
-const ConversationDetail = () => {
+interface ConversationDetailProps {
+  conversation: ConversationType;
+  userId: string;
+}
+
+const ConversationDetail: React.FC<ConversationDetailProps> = ({
+  conversation,
+  userId,
+}) => {
+  const myUser = conversation.participants.find(
+    (participant) => participant.id === userId
+  );
+  const otherUser = conversation.participants.find(
+    (participant) => participant.id !== userId
+  );
+
   return (
     <>
       <div className="max-h-[400px] overflow-auto flex flex-col space-y-4">
